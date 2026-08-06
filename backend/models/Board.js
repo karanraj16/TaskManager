@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const boardSchema = new mongoose.Schema({
     title :{
@@ -23,4 +23,4 @@ const boardSchema = new mongoose.Schema({
     ]
 },{ timestamps : true});
 
-module.exports = mongoose.model("Board", boardSchema)
+export default mongoose.model("Board", boardSchema)

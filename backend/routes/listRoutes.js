@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
-const {
+import {  protect  } from "../middleware/authMiddleware.js";
+import { 
   createList,
   getLists,
   updateList,
   deleteList,
-} = require("../controllers/listController");
+ } from "../controllers/listController.js";
 
 // ✅ Create list under a specific board
 router.post("/boards/:boardId/lists", protect, createList);
@@ -20,4 +20,4 @@ router.put("/lists/:id", protect, updateList);
 // ✅ Delete list by ID
 router.delete("/lists/:id", protect, deleteList);
 
-module.exports = router;
+export default router;

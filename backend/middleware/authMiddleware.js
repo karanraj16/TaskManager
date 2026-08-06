@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 // Protect routes (only logged-in users)
  const protect = async (req, res, next) => {
@@ -45,4 +45,4 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+export default { protect, admin };

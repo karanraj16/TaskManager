@@ -1,8 +1,8 @@
-const Task = require("../models/Task");
-const List = require("../models/List");
+import Task from "../models/Task.js";
+import List from "../models/List.js";
 
 // ✅ Create a task
-exports.createTask = async (req, res) => {
+export const createTask = async (req, res) => {
   try {
     const { listId } = req.params;
     const { title } = req.body;
@@ -32,7 +32,7 @@ exports.createTask = async (req, res) => {
 };
 
 // ✅ Get tasks in a list
-exports.getTasks = async (req, res) => {
+export const getTasks = async (req, res) => {
   try {
     const { listId } = req.params;
     const tasks = await Task.find({ list: listId });
@@ -43,7 +43,7 @@ exports.getTasks = async (req, res) => {
 };
 
 // ✅ Update a task (title, completed etc.)
-exports.updateTask = async (req, res) => {
+export const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, completed } = req.body;
@@ -64,7 +64,7 @@ exports.updateTask = async (req, res) => {
 };
 
 // ✅ Delete a task
-exports.deleteTask = async (req, res) => {
+export const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
 

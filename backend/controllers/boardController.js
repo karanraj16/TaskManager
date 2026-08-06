@@ -1,7 +1,7 @@
-const Board = require("../models/Board");
+import Board from "../models/Board.js";
 
 // @desc Create board
-exports.createBoard = async (req, res) => {
+export const createBoard = async (req, res) => {
   try {
     const board = new Board({ ...req.body, createdBy: req.user.id });
     await board.save();
@@ -12,7 +12,7 @@ exports.createBoard = async (req, res) => {
 };
 
 // @desc Get boards for logged-in user
-exports.getBoards = async (req, res) => {
+export const getBoards = async (req, res) => {
   try {
     const boards = await Board.find({ createdBy: req.user.id });
     res.status(200).json(boards);
@@ -21,7 +21,7 @@ exports.getBoards = async (req, res) => {
   }
 };
 
-exports.getBoardById = async (req, res) => {
+export const getBoardById = async (req, res) => {
   try {
     const board = await Board.findById(req.params.boardId);
     if (!board) {
@@ -34,7 +34,7 @@ exports.getBoardById = async (req, res) => {
 };
 
 // @desc Delete board
-exports.deleteBoard = async (req, res) => {
+export const deleteBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
     if (!board) {

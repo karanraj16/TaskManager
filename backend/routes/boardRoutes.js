@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
 
-const {createBoard ,getBoards, getBoardById, deleteBoard} = require("../controllers/boardController");
+import { createBoard ,getBoards, getBoardById, deleteBoard } from "../controllers/boardController.js";
 
-const {protect } = require("../middleware/authMiddleware");
+import { protect  } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -14,6 +14,6 @@ router.get("/:boardId",protect,getBoardById);
 
 router.delete("/:id", protect ,deleteBoard);
 
-module.exports = router;
+export default router;
 
 

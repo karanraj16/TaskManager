@@ -1,6 +1,6 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { register, login } = require("../controllers/authController");
+import express from "express";
+import {  body, validationResult  } from "express-validator";
+import {  register, login  } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -36,4 +36,4 @@ router.post(
   login
 );
 
-module.exports = router;
+export default router;

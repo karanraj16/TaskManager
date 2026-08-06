@@ -1,7 +1,7 @@
-const List = require("../models/List");
+import List from "../models/List.js";
 
 // ✅ Create a list under a board
-exports.createList = async (req, res) => {
+export const createList = async (req, res) => {
   if (!req.user) {
       return res.status(401).json({ message: "User not authenticated" });
      }
@@ -26,7 +26,7 @@ exports.createList = async (req, res) => {
 };
 
 // ✅ Get all lists for a board
-exports.getLists = async (req, res) => {
+export const getLists = async (req, res) => {
   try {
     const lists = await List.find({ board: req.params.boardId });
     res.status(200).json(lists);
@@ -37,7 +37,7 @@ exports.getLists = async (req, res) => {
 };
 
 // ✅ Update a list
-exports.updateList = async (req, res) => {
+export const updateList = async (req, res) => {
   try {
     const list = await List.findById(req.params.id);
     if (!list) return res.status(404).json({ message: "List not found" });
@@ -57,7 +57,7 @@ exports.updateList = async (req, res) => {
 };
 
 // ✅ Delete a list
-exports.deleteList = async (req, res) => {
+export const deleteList = async (req, res) => {
   try {
     const list = await List.findById(req.params.id);
     if (!list) return res.status(404).json({ message: "List not found" });
