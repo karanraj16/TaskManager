@@ -30,7 +30,7 @@ export const register = async (req, res) => {
     const token = generateToken(user);
 
     res.status(201).json({
-      user: { id: user._id, username: user.name, email: user.email },
+      user: { id: user._id, username: user.username, email: user.email },
       token,
     });
   } catch (err) {
@@ -60,7 +60,7 @@ export const login = async (req, res) => {
     const token = generateToken(user);
 
     res.status(200).json({
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.username, email: user.email },
       token,
     });
   } catch (err) {
