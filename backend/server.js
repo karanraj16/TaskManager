@@ -1,21 +1,28 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const authRoutes = require("./routes/authRoutes");
-const boardRoutes = require("./routes/boardRoutes");
-const listRoutes = require("./routes/listRoutes");
-const userRoute = require("./routes/userRoute");
-const taskRoutes = require("./routes/taskRoutes");
-const errorHandler = require("./middleware/errorMiddleware");
-const path = require("path");
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import authRoutes from "./routes/authRoutes.js";
+import boardRoutes from "./routes/boardRoutes.js";
+import listRoutes from "./routes/listRoutes.js";
+import userRoute from "./routes/userRoute.js";
+import taskRoutes from "./routes/taskRoutes.js";
+import errorHandler from "./middleware/errorMiddleware.js";
 
 dotenv.config();
+
 const PORT = process.env.PORT || 5000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(cors({ 
+  origin: process.env.CLIENT_URL || "http://localhost:3000", 
+  credentials: true 
+}));
 app.use(express.json());
 
 // Mount routes
@@ -23,16 +30,15 @@ app.use("/api/auth", authRoutes);
 app.use("/api/boards", boardRoutes);
 app.use("/api", listRoutes);
 app.use("/api", taskRoutes);
-app.use("/api/users",userRoute);
+app.use("/api/users", userRoute);
 
+// Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname,"frontend", "build")));
-
-  app.use( (req, res) =>
-    res.sendFile(path.resolve(__dirname, "../frontend/build" , "index.html"))
+  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  app.use((req, res) =>
+    res.sendFile(path.resolve(__dirname, "../frontend/build/index.html"))
   );
-};
+}
 
 // Global error handler
 app.use(errorHandler);
@@ -40,7 +46,7 @@ app.use(errorHandler);
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("MongoDB connected");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log("✅ MongoDB connected");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
-  .catch(err => console.log(err));
+  .catch(err => console.log("❌ MongoDB Error:", err));
