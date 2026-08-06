@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 // Protect routes (only logged-in users)
- const protect = async (req, res, next) => {
+ export const protect = async (req, res, next) => {
   console.log("protect middleware hit");
 
   let token;
@@ -37,7 +37,7 @@ import User from "../models/User.js";
 
 
 // Optional: Only allow admin users
-const admin = (req, res, next) => {
+export const admin = (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     next();
   } else {
@@ -45,4 +45,4 @@ const admin = (req, res, next) => {
   }
 };
 
-export default { protect, admin };
+
