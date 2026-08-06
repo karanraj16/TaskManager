@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 // Protect routes (only logged-in users)
- export const protect = async (req, res, next) => {
+ export default async function Protect (req, res, next){
   console.log("protect middleware hit");
 
   let token;
