@@ -21,7 +21,8 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://task-manager-8wf7hvr9y-karan-e373.vercel.app"
+  "https://task-manager-gfbppgmwh-karan-e373.vercel.app", // your current Vercel frontend
+  "https://task-manager-8wf7hvr9y-karan-e373.vercel.app"  // older deployment if still used
 ];
 
 app.use(cors({
