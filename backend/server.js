@@ -2,8 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import boardRoutes from "./routes/boardRoutes.js";
 import listRoutes from "./routes/listRoutes.js";
@@ -14,9 +12,6 @@ import errorHandler from "./middleware/errorMiddleware.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 
 // CORS configuration
@@ -39,8 +34,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
+// Health check endpoints
 app.get("/", (req, res) => {
   res.json({ message: "✅ Backend is running!", status: "ok" });
 });
@@ -56,44 +52,40 @@ app.use("/api", listRoutes);
 app.use("/api", taskRoutes);
 app.use("/api/users", userRoute);
 
-// Serve frontend in production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "../frontend/build", "index.html"))
-  );
-}
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
 
 // Global error handler
 app.use(errorHandler);
 
-// MongoDB connection with better error handling
+// MongoDB connection with retry logic
 console.log("🔌 Attempting MongoDB connection...");
 console.log("MONGO_URI configured:", !!process.env.MONGO_URI);
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  connectTimeoutMS: 10000,
-})
-  .then(() => {
-    console.log("✅ MongoDB connected successfully");
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔐 Client URL: ${process.env.CLIENT_URL}`);
-    });
+const connectDB = () => {
+  mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    connectTimeoutMS: 10000,
   })
-  .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err.message);
-    console.error("Full error:", err);
-    // Don't exit - Render will keep trying
-    setTimeout(() => {
-      mongoose.connect(process.env.MONGO_URI)
-        .then(() => console.log("✅ MongoDB reconnected"))
-        .catch(err => console.error("❌ Reconnection failed:", err));
-    }, 5000);
-  });
+    .then(() => {
+      console.log("✅ MongoDB connected successfully");
+      app.listen(PORT, "0.0.0.0", () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`🔐 Client URL: ${process.env.CLIENT_URL}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ MongoDB connection failed:", err.message);
+      console.log("🔄 Retrying in 5 seconds...");
+      setTimeout(connectDB, 5000);
+    });
+};
+
+connectDB();
 
 // Graceful shutdown
 process.on("SIGINT", () => {
