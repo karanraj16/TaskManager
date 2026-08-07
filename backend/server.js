@@ -19,23 +19,35 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// CORS configuration
 const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "https://task-manager-n7e8hl5hn-karan-e373.vercel.app",
   "http://localhost:3000",
-  "https://task-manager-gfbppgmwh-karan-e373.vercel.app", // your current Vercel deployment
-  "https://task-manager-8wf7hvr9y-karan-e373.vercel.app"  // older deployment if still used
+  "http://localhost:5000"
 ];
-app.use(cors({
-  origin: (origin, callback) => {
+
+app.use(cors({ 
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
+  credentials: true 
 }));
 
 app.use(express.json());
+
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.json({ message: "✅ Backend is running!", status: "ok" });
+});
+
+app.get("/api", (req, res) => {
+  res.json({ message: "✅ API is working!", status: "ok" });
+});
 
 // Mount routes
 app.use("/api/auth", authRoutes);
@@ -47,18 +59,45 @@ app.use("/api/users", userRoute);
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/build")));
-  app.use((req, res) =>
-    res.sendFile(path.resolve(__dirname, "../frontend/build/index.html"))
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "../frontend/build", "index.html"))
   );
 }
 
 // Global error handler
 app.use(errorHandler);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
+// MongoDB connection with better error handling
+console.log("🔌 Attempting MongoDB connection...");
+console.log("MONGO_URI configured:", !!process.env.MONGO_URI);
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  connectTimeoutMS: 10000,
+})
   .then(() => {
-    console.log("✅ MongoDB connected");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    console.log("✅ MongoDB connected successfully");
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔐 Client URL: ${process.env.CLIENT_URL}`);
+    });
   })
-  .catch(err => console.log("❌ MongoDB Error:", err));
+  .catch((err) => {
+    console.error("❌ MongoDB connection failed:", err.message);
+    console.error("Full error:", err);
+    // Don't exit - Render will keep trying
+    setTimeout(() => {
+      mongoose.connect(process.env.MONGO_URI)
+        .then(() => console.log("✅ MongoDB reconnected"))
+        .catch(err => console.error("❌ Reconnection failed:", err));
+    }, 5000);
+  });
+
+// Graceful shutdown
+process.on("SIGINT", () => {
+  console.log("🛑 Server shutting down...");
+  mongoose.connection.close();
+  process.exit(0);
+});
